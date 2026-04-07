@@ -5,12 +5,23 @@ import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 
 class ApiService {
-  // Railway exposes the backend over HTTPS; the app itself listens on port
-  // 8000 internally. Override with --dart-define=API_BASE_URL=... if needed.
-  static const String baseUrl = String.fromEnvironment(
+  static const String _rawBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8000',
   );
+
+  // Ensure no trailing slash for consistent path joining
+  static String get baseUrl => _rawBaseUrl.endsWith('/') 
+      ? _rawBaseUrl.substring(0, _rawBaseUrl.length - 1) 
+      : _rawBaseUrl;
+
+  ApiService() {
+    // Helpful log to verify configuration in production/browser console
+    print('ApiService initialized with baseUrl: $baseUrl');
+    if (baseUrl == 'http://localhost:8000') {
+      print('WARNING: ApiService is using default localhost. Set API_BASE_URL for production.');
+    }
+  }
 
   final AuthService _auth = AuthService();
 
