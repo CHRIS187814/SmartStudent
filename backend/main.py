@@ -55,9 +55,14 @@ def _resolve_path(value: str, base_dir: Path) -> Path:
     if resolved.exists():
         return resolved
 
-    fallback = (base_dir / "models" / candidate.name).resolve()
-    if fallback.exists():
-        return fallback
+    # Support both the current models/ layout and the legacy root-level files.
+    fallback_paths = (
+        (base_dir / "models" / candidate.name).resolve(),
+        (base_dir / candidate.name).resolve(),
+    )
+    for fallback in fallback_paths:
+        if fallback.exists():
+            return fallback
 
     return resolved
 
