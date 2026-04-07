@@ -1,11 +1,11 @@
 [phases.setup]
-nixPkgs = ["flutter", "git", "python3"]
+nixPkgs = ["flutter", "git", "nodejs"]
 
 [phases.install]
 cmds = ["flutter pub get"]
 
 [phases.build]
-cmds = ["flutter build web"]
+cmds = ["bash -c \"flutter build web --release --web-renderer canvaskit --dart-define=API_BASE_URL=${API_BASE_URL:-http://localhost:8000}\""]
 
 [start]
-cmd = "python3 -m http.server 8000 --directory build/web"
+cmd = "npx serve -s build/web -p ${PORT:-8000}"

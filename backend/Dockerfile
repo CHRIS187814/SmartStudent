@@ -8,11 +8,15 @@ WORKDIR /app
 
 COPY requirements.txt ./
 
-RUN python -m pip install --upgrade pip && \
-    pip install -r requirements.txt
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser && \
+    python -m pip install --upgrade pip && \
+    pip install -r requirements.txt && \
+    mkdir -p logs models && chown -R appuser:appgroup /app
 
-COPY . .
+USER appuser
+
+COPY --chown=appuser:appgroup . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "exec python src/main.py"]
