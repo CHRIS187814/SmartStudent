@@ -17,6 +17,4 @@ USER appuser
 
 COPY --chown=appuser:appgroup . .
 
-EXPOSE 8000
-
 CMD ["sh", "-c", "exec python src/main.py"]
