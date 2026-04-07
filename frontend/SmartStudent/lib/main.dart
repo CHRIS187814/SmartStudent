@@ -22,12 +22,12 @@ class SmartStudentApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF0F0F1A),
         primaryColor: const Color(0xFF6C63FF),
-        cardTheme: CardThemeData(
-          color: const Color(0xFF1A1A2E),
+        cardTheme: const CardTheme(
+          color: Color(0xFF1A1A2E),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(16)),
-            side: const BorderSide(color: Color(0xFF2A2A4A), width: 0.5),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+            side: BorderSide(color: Color(0xFF2A2A4A), width: 0.5),
           ),
         ),
         textTheme: const TextTheme(

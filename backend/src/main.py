@@ -16,6 +16,7 @@ from uuid import uuid4
 
 import joblib
 import uvicorn
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -160,11 +161,29 @@ def configure_application_logger(name: str = "smart_student", level: str = "INFO
 settings = get_settings()
 logger = configure_application_logger(level=settings.log_level)
 
+@asynccontextmanager
+async def app_lifespan(app: FastAPI):
+    missing = settings.missing_production_config
+    if settings.is_production and missing:
+        logger.critical("Missing required production configuration: %s", ", ".join(missing))
+        raise RuntimeError(f"Missing required production configuration: {', '.join(missing)}")
+
+    logger.info(
+        "FastAPI backend started env=%s docs=%s workers=%s ml_mode=%s",
+        settings.environment,
+        settings.docs_enabled,
+        settings.workers,
+        globals().get("ml_mode", "unknown"),
+    )
+    yield
+    logger.info("FastAPI backend stopped")
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     docs_url="/docs" if settings.docs_enabled else None,
     redoc_url="/redoc" if settings.docs_enabled else None,
+    lifespan=app_lifespan,
 )
 
 if settings.trusted_hosts:
@@ -368,25 +387,7 @@ def enrich_tasks(raw_tasks: list[dict[str, Any]], now: datetime) -> list[dict[st
     return enriched
 
 
-@app.on_event("startup")
-def on_startup():
-    missing = settings.missing_production_config
-    if settings.is_production and missing:
-        logger.critical("Missing required production configuration: %s", ", ".join(missing))
-        raise RuntimeError(f"Missing required production configuration: {', '.join(missing)}")
 
-    logger.info(
-        "FastAPI backend started env=%s docs=%s workers=%s ml_mode=%s",
-        settings.environment,
-        settings.docs_enabled,
-        settings.workers,
-        ml_mode,
-    )
-
-
-@app.on_event("shutdown")
-def on_shutdown():
-    logger.info("FastAPI backend stopped")
 
 
 @app.middleware("http")
